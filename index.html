@@ -1,0 +1,2519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Bookshelf</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4f46e5;
+            --primary-light: #818cf8;
+            --primary-dark: #4338ca;
+            --secondary-color: #f97316;
+            --secondary-light: #fb923c;
+            --text-color: #1f2937;
+            --text-light: #6b7280;
+            --bg-color: #f9fafb;
+            --bg-card: #ffffff;
+            --border-color: #e5e7eb;
+            --success-color: #10b981;
+            --error-color: #ef4444;
+            --rating-color: #f59e0b;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+        }
+
+        .app-container {
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        @media (min-width: 768px) {
+            .app-container {
+                max-width: 1200px;
+                padding: 0 1rem;
+            }
+        }
+
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 50;
+            background-color: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .app-title {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .app-title:hover {
+            color: var(--primary-color);
+        }
+
+        .main-content {
+            padding-top: 4.5rem;
+            padding-bottom: 5rem;
+        }
+
+        @media (min-width: 768px) {
+            .main-content {
+                padding-top: 5rem;
+                padding-bottom: 2rem;
+            }
+        }
+
+        .book-card {
+            border-radius: 0.75rem;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+        }
+
+        .book-card:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transform: translateY(-4px);
+        }
+
+        /* Updated book cover style for consistent display across all views */
+        .book-cover {
+            height: 180px;
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-color: #f3f4f6;
+            position: relative;
+        }
+
+        @media (min-width: 768px) {
+            .book-cover {
+                height: 220px;
+            }
+        }
+
+        .progress-bar {
+            height: 8px;
+            border-radius: 4px;
+            background-color: #e5e7eb;
+            overflow: hidden;
+        }
+
+        .progress-value {
+            height: 100%;
+            background-color: var(--primary-color);
+        }
+
+        .rating {
+            color: var(--rating-color);
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: var(--bg-card);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-around;
+            padding: 0.75rem 0;
+            z-index: 50;
+            box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        @media (min-width: 768px) {
+            .bottom-nav {
+                display: none;
+            }
+        }
+
+        .bottom-nav a {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--text-light);
+            text-decoration: none;
+            font-size: 0.75rem;
+            transition: color 0.2s ease;
+        }
+
+        .bottom-nav a.active {
+            color: var(--primary-color);
+        }
+
+        .bottom-nav i {
+            font-size: 1.25rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            background-color: var(--bg-card);
+            border-radius: 0.75rem;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .quote-card {
+            border-left: 4px solid var(--primary-color);
+            padding-left: 1rem;
+            background-color: var(--bg-card);
+        }
+
+        .fab-button {
+            position: fixed;
+            bottom: 5.5rem;
+            right: 1.5rem;
+            width: 3.5rem;
+            height: 3.5rem;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            z-index: 40;
+            transition: all 0.3s ease;
+        }
+
+        .fab-button:hover {
+            background-color: var(--primary-dark);
+            transform: scale(1.05);
+        }
+
+        @media (min-width: 768px) {
+            .fab-button {
+                bottom: 2rem;
+                right: 2rem;
+            }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.625rem 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.375rem;
+            transition: border-color 0.2s ease;
+            background-color: white;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .btn {
+            padding: 0.625rem 1.25rem;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+            border: 1px solid var(--primary-color);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .btn-outline {
+            border: 1px solid var(--border-color);
+            background-color: white;
+            color: var(--text-color);
+        }
+
+        .btn-outline:hover {
+            background-color: #f3f4f6;
+        }
+
+        .btn-danger {
+            background-color: var(--error-color);
+            color: white;
+            border: 1px solid var(--error-color);
+        }
+
+        .btn-danger:hover {
+            background-color: #dc2626;
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary-color);
+            color: white;
+            border: 1px solid var(--secondary-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: #ea580c;
+        }
+
+        .star {
+            cursor: pointer;
+            font-size: 1.75rem;
+            transition: color 0.2s ease;
+        }
+
+        .star.filled {
+            color: var(--rating-color);
+        }
+
+        .star.empty {
+            color: #d1d5db;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 6rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--text-color);
+            color: white;
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.375rem;
+            z-index: 100;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        @media (min-width: 768px) {
+            .toast {
+                bottom: 2rem;
+            }
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+
+        .image-preview {
+            width: 100%;
+            height: 200px;
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-color: #f3f4f6;
+            border-radius: 0.5rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-light);
+            border: 2px dashed var(--border-color);
+        }
+
+        .image-upload-options {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .image-upload-options button {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            background-color: white;
+            transition: all 0.2s ease;
+        }
+
+        .image-upload-options button:hover {
+            background-color: #f3f4f6;
+            border-color: var(--primary-light);
+        }
+
+        .image-upload-options i {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary-color);
+        }
+
+        /* Desktop specific styles */
+        @media (min-width: 768px) {
+            .desktop-nav {
+                display: flex;
+                align-items: center;
+            }
+
+            .desktop-nav a {
+                padding: 0.5rem 1rem;
+                color: var(--text-color);
+                text-decoration: none;
+                font-weight: 500;
+                transition: color 0.2s ease;
+            }
+
+            .desktop-nav a.active {
+                color: var(--primary-color);
+                border-bottom: 2px solid var(--primary-color);
+            }
+
+            .desktop-nav a:hover {
+                color: var(--primary-color);
+            }
+
+            .books-grid {
+                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            }
+
+            .book-detail-container {
+                display: grid;
+                grid-template-columns: 300px 1fr;
+                gap: 2rem;
+            }
+
+            .book-detail-sidebar {
+                position: sticky;
+                top: 6rem;
+                height: fit-content;
+            }
+        }
+
+        /* Book detail cover - consistent with other views */
+        .book-detail-cover {
+            width: 100%;
+            height: 300px;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            margin-bottom: 1.5rem;
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-color: #f3f4f6;
+        }
+
+        @media (min-width: 768px) {
+            .book-detail-cover {
+                height: 400px;
+                margin-bottom: 0;
+            }
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a1a1a1;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        /* Page header */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        @media (min-width: 768px) {
+            .page-header {
+                flex-wrap: nowrap;
+                margin-bottom: 2rem;
+            }
+        }
+
+        /* Search input */
+        .search-container {
+            position: relative;
+            width: 100%;
+        }
+
+        @media (min-width: 768px) {
+            .search-container {
+                width: auto;
+                min-width: 250px;
+            }
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.625rem 0.75rem 0.625rem 2.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 0.375rem;
+            transition: all 0.2s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-light);
+        }
+
+        /* Book detail page */
+        .book-detail-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .book-detail-info {
+            margin-bottom: 1.5rem;
+        }
+
+        .book-detail-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        @media (min-width: 768px) {
+            .book-detail-title {
+                font-size: 1.875rem;
+            }
+        }
+
+        .book-detail-author {
+            color: var(--text-light);
+            margin-bottom: 1rem;
+        }
+
+        .book-detail-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            background-color: var(--bg-card);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border-color);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-value {
+            font-weight: 600;
+        }
+
+        /* Section headers */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--text-light);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--border-color);
+        }
+
+        /* Auth form */
+        .auth-container {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .auth-card {
+            background-color: var(--bg-card);
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            padding: 2rem;
+        }
+
+        .auth-logo {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .auth-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Profile avatar */
+        .profile-avatar {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .profile-avatar:hover {
+            background-color: var(--primary-dark);
+        }
+
+        /* Card styles */
+        .card {
+            background-color: var(--bg-card);
+            border-radius: 0.75rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border-color);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        /* Alert styles */
+        .alert {
+            padding: 0.75rem 1rem;
+            border-radius: 0.375rem;
+            margin-bottom: 1rem;
+        }
+
+        .alert-success {
+            background-color: #ecfdf5;
+            border: 1px solid #a7f3d0;
+            color: #065f46;
+        }
+
+        .alert-error {
+            background-color: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #b91c1c;
+        }
+
+        /* Badge styles */
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .badge-primary {
+            background-color: #e0e7ff;
+            color: var(--primary-dark);
+        }
+
+        .badge-secondary {
+            background-color: #ffedd5;
+            color: #9a3412;
+        }
+
+        /* Reading history item */
+        .history-item {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            background-color: var(--bg-card);
+            margin-bottom: 1rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .history-item-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .history-item-date {
+            font-weight: 500;
+        }
+
+        .history-item-pages {
+            color: var(--text-light);
+        }
+
+        /* Import/Export section */
+        .import-export-section {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        @media (min-width: 768px) {
+            .import-export-section {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .import-export-card {
+            background-color: var(--bg-card);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .import-export-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .import-export-description {
+            color: var(--text-light);
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Login/Register View -->
+        <div id="auth-view" class="p-4 flex items-center justify-center min-h-screen">
+            <div class="auth-container">
+                <div class="auth-logo">
+                    <i class="fas fa-book-open text-4xl text-indigo-600"></i>
+                </div>
+                <div class="auth-card">
+                    <h2 id="auth-title" class="auth-title">Login</h2>
+                    
+                    <form id="auth-form" class="space-y-4">
+                        <div id="name-field" class="form-group hidden">
+                            <label for="name" class="form-label">Name</label>
+                            <input type="text" id="name" class="form-input" placeholder="Your name">
+                        </div>
+                        
+                        <div id="email-field" class="form-group hidden">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" id="email" class="form-input" placeholder="your.email@example.com">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="username" class="form-label">Username</label>
+                            <input type="text" id="username" class="form-input" placeholder="Username">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" id="password" class="form-input" placeholder="Password">
+                        </div>
+                        
+                        <div id="auth-error" class="alert alert-error hidden"></div>
+                        
+                        <button type="submit" id="auth-submit" class="btn btn-primary w-full">Login</button>
+                    </form>
+                    
+                    <div class="mt-4 text-center">
+                        <button id="auth-toggle" class="text-indigo-600 hover:text-indigo-800">Don't have an account? Register</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main App View -->
+        <div id="app-view" class="hidden">
+            <!-- Navbar -->
+            <div class="navbar">
+                <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+                    <div id="app-title-button" class="app-title">
+                        <i class="fas fa-book-open text-indigo-600 mr-2 text-xl"></i>
+                        <span class="font-bold text-lg">MyBookshelf</span>
+                    </div>
+                    
+                    <!-- Desktop Navigation -->
+                    <div class="hidden md:flex desktop-nav">
+                        <a href="#" id="desktop-nav-bookshelf" class="active">Bookshelf</a>
+                        <a href="#" id="desktop-nav-profile">Profile</a>
+                    </div>
+                    
+                    <div>
+                        <button id="profile-button" class="profile-avatar">
+                            <span id="user-initials">U</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="main-content container mx-auto px-4">
+                <!-- Bookshelf View -->
+                <div id="bookshelf-tab" class="tab-content active">
+                    <div class="page-header">
+                        <h1 class="text-2xl font-bold">My Bookshelf</h1>
+                        <div class="search-container">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" id="search-input" placeholder="Search books..." class="search-input">
+                        </div>
+                    </div>
+                    
+                    <div id="books-container" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6 books-grid">
+                        <!-- Books will be added here dynamically -->
+                    </div>
+                    
+                    <div id="empty-bookshelf" class="hidden empty-state">
+                        <i class="fas fa-book"></i>
+                        <p class="text-lg mb-4">Your bookshelf is empty.</p>
+                        <button id="add-first-book" class="btn btn-primary">
+                            <i class="fas fa-plus mr-2"></i>Add Your First Book
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Book Detail View -->
+                <div id="book-detail-tab" class="tab-content">
+                    <button id="back-to-bookshelf" class="mb-6 flex items-center text-indigo-600 hover:text-indigo-800">
+                        <i class="fas fa-arrow-left mr-2"></i>Back to Bookshelf
+                    </button>
+                    
+                    <div class="book-detail-container">
+                        <div class="book-detail-sidebar">
+                            <div id="book-cover" class="book-detail-cover flex items-center justify-center bg-gray-200">
+                                <span class="text-gray-400">No cover</span>
+                            </div>
+                            
+                            <div class="mt-4 space-y-4">
+                                <button id="update-progress-button" class="btn btn-primary w-full">
+                                    <i class="fas fa-bookmark mr-2"></i>Update Progress
+                                </button>
+                                
+                                <button id="book-rating-button" class="btn btn-outline w-full flex items-center justify-center">
+                                    <i class="fas fa-star text-yellow-500 mr-2"></i>
+                                    <span id="rating-text">Rate</span>
+                                </button>
+                                
+                                <button id="add-quote-button" class="btn btn-outline w-full flex items-center justify-center">
+                                    <i class="fas fa-quote-right mr-2"></i>Add Quote
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="book-detail-content">
+                            <div class="book-detail-header">
+                                <h1 id="book-title" class="book-detail-title"></h1>
+                                <p id="book-author" class="book-detail-author"></p>
+                                
+                                <div class="mb-4">
+                                    <div class="flex justify-between text-sm mb-1">
+                                        <span>Reading Progress</span>
+                                        <span id="progress-percentage">0%</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <div id="progress-value" class="progress-value" style="width: 0%"></div>
+                                    </div>
+                                    <div class="flex justify-between text-sm text-gray-500 mt-1">
+                                        <span id="pages-info">0 of 0 pages</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="book-detail-stats">
+                                    <div class="stat-card">
+                                        <div class="stat-label">Started</div>
+                                        <div id="start-date" class="stat-value">Not started</div>
+                                    </div>
+                                    <div class="stat-card">
+                                        <div class="stat-label">Finished</div>
+                                        <div id="end-date" class="stat-value">Not finished</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Reading History Section -->
+                            <div class="mb-6">
+                                <div class="section-header">
+                                    <h2 class="text-xl font-bold">Reading History</h2>
+                                </div>
+                                <div id="reading-history-container">
+                                    <!-- Reading history will be added here dynamically -->
+                                </div>
+                                <p id="empty-history" class="text-gray-500 py-4">No reading history yet.</p>
+                            </div>
+                            
+                            <!-- Quotes Section -->
+                            <div class="mb-6">
+                                <div class="section-header">
+                                    <h2 class="text-xl font-bold">Quotes</h2>
+                                </div>
+                                <div id="quotes-container">
+                                    <!-- Quotes will be added here dynamically -->
+                                </div>
+                                <p id="empty-quotes" class="text-gray-500 py-4">No quotes saved yet.</p>
+                            </div>
+                            
+                            <button id="delete-book-button" class="btn btn-danger w-full md:w-auto">
+                                <i class="fas fa-trash mr-2"></i>Delete Book
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Profile View -->
+                <div id="profile-tab" class="tab-content">
+                    <div class="page-header">
+                        <h1 class="text-2xl font-bold">Your Profile</h1>
+                    </div>
+                    
+                    <div class="card">
+                        <h2 class="card-title">Profile Information</h2>
+                        <p class="text-sm text-gray-500 mb-4">Update your personal details</p>
+                        
+                        <div id="profile-success" class="alert alert-success hidden"></div>
+                        <div id="profile-error" class="alert alert-error hidden"></div>
+                        
+                        <form id="profile-form" class="space-y-4">
+                            <div class="form-group">
+                                <label for="profile-username" class="form-label">Username</label>
+                                <input type="text" id="profile-username" class="form-input bg-gray-100" disabled>
+                                <p class="text-xs text-gray-500 mt-1">Username cannot be changed</p>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="profile-name" class="form-label">Name</label>
+                                <input type="text" id="profile-name" class="form-input">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="profile-email" class="form-label">Email</label>
+                                <input type="email" id="profile-email" class="form-input">
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save mr-2"></i>Update Profile
+                            </button>
+                        </form>
+                    </div>
+                    
+                    <div class="card">
+                        <h2 class="card-title">Import & Export</h2>
+                        
+                        <div class="import-export-section">
+                            <div class="import-export-card">
+                                <h3 class="import-export-title">Export Data</h3>
+                                <p class="import-export-description">Download your bookshelf data as a JSON file</p>
+                                <button id="export-button" class="btn btn-outline w-full flex items-center justify-center">
+                                    <i class="fas fa-download mr-2"></i>Export to JSON
+                                </button>
+                            </div>
+                            
+                            <div class="import-export-card">
+                                <h3 class="import-export-title">Import Data</h3>
+                                <p class="import-export-description">Restore your bookshelf from a JSON file</p>
+                                <label for="import-file" class="btn btn-outline w-full flex items-center justify-center">
+                                    <i class="fas fa-upload mr-2"></i>Import from JSON
+                                </label>
+                                <input type="file" id="import-file" accept=".json" class="hidden">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <h2 class="card-title">Account</h2>
+                        <p id="member-since" class="mb-4">Member since: </p>
+                        <button id="logout-button" class="btn btn-outline">
+                            <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Navigation (Mobile) -->
+            <div class="bottom-nav">
+                <a href="#" id="nav-bookshelf" class="active">
+                    <i class="fas fa-book-open"></i>
+                    <span>Bookshelf</span>
+                </a>
+                <a href="#" id="nav-profile">
+                    <i class="fas fa-user"></i>
+                    <span>Profile</span>
+                </a>
+            </div>
+
+            <!-- Floating Action Button -->
+            <button id="add-book-button" class="fab-button">
+                <i class="fas fa-plus"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Add Book Modal -->
+    <div id="add-book-modal" class="modal">
+        <div class="modal-content p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold">Add New Book</h2>
+                <button class="modal-close text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <form id="add-book-form" class="space-y-4">
+                <div class="form-group">
+                    <label for="book-title-input" class="form-label">Title</label>
+                    <input type="text" id="book-title-input" class="form-input" placeholder="Book title" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="book-author-input" class="form-label">Author</label>
+                    <input type="text" id="book-author-input" class="form-input" placeholder="Author name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="book-pages-input" class="form-label">Total Pages</label>
+                    <input type="number" id="book-pages-input" class="form-input" placeholder="Number of pages" required min="1">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Book Cover</label>
+                    <div id="book-cover-preview" class="image-preview">
+                        <span>No image selected</span>
+                    </div>
+                    
+                    <div class="image-upload-options">
+                        <button type="button" id="gallery-upload-button">
+                            <i class="fas fa-image"></i>
+                            <span>Gallery</span>
+                        </button>
+                        <button type="button" id="camera-upload-button">
+                            <i class="fas fa-camera"></i>
+                            <span>Camera</span>
+                        </button>
+                    </div>
+                    
+                    <input type="file" id="book-cover-input" accept="image/*" class="hidden">
+                    <input type="file" id="book-cover-camera" accept="image/*" capture="environment" class="hidden">
+                    <input type="hidden" id="book-cover-data">
+                </div>
+                
+                <div class="form-group">
+                    <label for="book-start-date-input" class="form-label">Start Date</label>
+                    <input type="date" id="book-start-date-input" class="form-input">
+                </div>
+                
+                <div class="flex justify-end space-x-2">
+                    <button type="button" class="btn btn-outline modal-close">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Book</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Update Progress Modal -->
+    <div id="update-progress-modal" class="modal">
+        <div class="modal-content p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold">Update Reading Progress</h2>
+                <button class="modal-close text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <form id="update-progress-form" class="space-y-4">
+                <div class="form-group">
+                    <label for="pages-read-input" class="form-label">Pages Read</label>
+                    <input type="number" id="pages-read-input" class="form-input" placeholder="Number of pages read" required min="0">
+                    <div id="pages-info-modal" class="text-xs text-gray-500 mt-1">0 of 0 pages read (0%)</div>
+                </div>
+                
+                <div class="flex items-center space-x-2 mb-4">
+                    <input type="checkbox" id="finished-checkbox" class="h-4 w-4 rounded border-gray-300">
+                    <label for="finished-checkbox">I finished this book</label>
+                </div>
+                
+                <div class="form-group">
+                    <label for="reading-notes-input" class="form-label">Reading Notes</label>
+                    <textarea id="reading-notes-input" class="form-input" rows="3" placeholder="Add notes about your reading session"></textarea>
+                </div>
+                
+                <div class="flex justify-end space-x-2">
+                    <button type="button" class="btn btn-outline modal-close">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update Progress</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Quote Modal -->
+    <div id="add-quote-modal" class="modal">
+        <div class="modal-content p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold">Add New Quote</h2>
+                <button class="modal-close text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <form id="add-quote-form" class="space-y-4">
+                <div class="form-group">
+                    <label for="quote-content-input" class="form-label">Quote</label>
+                    <textarea id="quote-content-input" class="form-input" rows="4" placeholder="Enter the quote text" required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="quote-page-input" class="form-label">Page Number</label>
+                    <input type="number" id="quote-page-input" class="form-input" placeholder="Page number" required min="1">
+                </div>
+                
+                <div class="flex justify-end space-x-2">
+                    <button type="button" class="btn btn-outline modal-close">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Quote</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Rating Modal -->
+    <div id="rating-modal" class="modal">
+        <div class="modal-content p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold">Rate Book</h2>
+                <button class="modal-close text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="flex justify-center py-6">
+                <div id="rating-stars" class="flex space-x-3">
+                    <span class="star empty" data-rating="1"><i class="fas fa-star"></i></span>
+                    <span class="star empty" data-rating="2"><i class="fas fa-star"></i></span>
+                    <span class="star empty" data-rating="3"><i class="fas fa-star"></i></span>
+                    <span class="star empty" data-rating="4"><i class="fas fa-star"></i></span>
+                    <span class="star empty" data-rating="5"><i class="fas fa-star"></i></span>
+                </div>
+            </div>
+            
+            <div class="flex justify-end space-x-2">
+                <button type="button" class="btn btn-outline modal-close">Cancel</button>
+                <button id="save-rating-button" class="btn btn-primary">Save Rating</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="delete-modal" class="modal">
+        <div class="modal-content p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold">Delete Book</h2>
+                <button class="modal-close text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <p class="mb-6">Are you sure you want to delete "<span id="delete-book-title"></span>"? This action cannot be undone.</p>
+            
+            <div class="flex justify-end space-x-2">
+                <button type="button" class="btn btn-outline modal-close">Cancel</button>
+                <button id="confirm-delete-button" class="btn btn-danger">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import Modal -->
+    <div id="import-modal" class="modal">
+        <div class="modal-content p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold">Import Data</h2>
+                <button class="modal-close text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <p class="mb-4 text-sm text-gray-500">
+                Select a JSON file to import. This will merge with your existing data.
+            </p>
+            
+            <div id="import-file-info" class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center mb-6">
+                <i class="fas fa-file-upload text-gray-400 text-3xl mb-2"></i>
+                <p id="import-filename" class="font-medium">No file selected</p>
+                <p id="import-filesize" class="text-xs text-gray-500 mt-1">Please select a file</p>
+            </div>
+            
+            <div id="import-error" class="alert alert-error hidden"></div>
+            
+            <div class="flex justify-end space-x-2">
+                <button type="button" class="btn btn-outline modal-close">Cancel</button>
+                <button id="confirm-import-button" class="btn btn-primary" disabled>Import</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <span id="toast-message"></span>
+    </div>
+
+    <script>
+        // Storage keys
+        const STORAGE_KEYS = {
+            BOOKS: 'bookshelf_books',
+            USERS: 'bookshelf_users',
+            READING_PROGRESS: 'bookshelf_reading_progress',
+            AUTH: 'bookshelf_auth',
+        };
+
+        // Helper to get data from localStorage with type safety
+        function getFromStorage(key, defaultValue) {
+            try {
+                const storedValue = localStorage.getItem(key);
+                return storedValue ? JSON.parse(storedValue) : defaultValue;
+            } catch (error) {
+                console.error(`Error retrieving ${key} from localStorage:`, error);
+                return defaultValue;
+            }
+        }
+
+        // Helper to save data to localStorage
+        function saveToStorage(key, value) {
+            try {
+                localStorage.setItem(key, JSON.stringify(value));
+            } catch (error) {
+                console.error(`Error saving ${key} to localStorage:`, error);
+            }
+        }
+
+        // Generate a UUID
+        function generateUUID() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                const r = Math.random() * 16 | 0;
+                const v = c === 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+
+        // Format date
+        function formatDate(dateString) {
+            if (!dateString) return 'Not started';
+            return new Date(dateString).toLocaleDateString();
+        }
+
+        // Calculate days reading
+        function calculateDaysReading(startDate, endDate) {
+            if (!startDate) return 'Not started';
+            
+            const start = new Date(startDate);
+            const end = endDate ? new Date(endDate) : new Date();
+            const diffTime = Math.abs(end.getTime() - start.getTime());
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            return `${diffDays} day${diffDays !== 1 ? 's' : ''}`;
+        }
+
+        // Get initials from name
+        function getInitials(name) {
+            return name
+                .split(' ')
+                .map(part => part[0])
+                .join('')
+                .toUpperCase()
+                .substring(0, 2);
+        }
+
+        // Show toast notification
+        function showToast(message, duration = 3000) {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toast-message');
+            
+            toastMessage.textContent = message;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, duration);
+        }
+
+        // Resize image to reduce storage size
+        function resizeImage(dataUrl, maxWidth = 800, maxHeight = 800) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.src = dataUrl;
+                img.onload = function() {
+                    let width = img.width;
+                    let height = img.height;
+                    
+                    // Calculate new dimensions
+                    if (width > height) {
+                        if (width > maxWidth) {
+                            height *= maxWidth / width;
+                            width = maxWidth;
+                        }
+                    } else {
+                        if (height > maxHeight) {
+                            width *= maxHeight / height;
+                            height = maxHeight;
+                        }
+                    }
+                    
+                    // Create canvas and resize
+                    const canvas = document.createElement('canvas');
+                    canvas.width = width;
+                    canvas.height = height;
+                    
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    // Get resized data URL
+                    const resizedDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+                    resolve(resizedDataUrl);
+                };
+                img.onerror = reject;
+            });
+        }
+
+        // Book service
+        const bookService = {
+            getAll: () => {
+                return getFromStorage(STORAGE_KEYS.BOOKS, []);
+            },
+            
+            getById: (id) => {
+                const books = getFromStorage(STORAGE_KEYS.BOOKS, []);
+                return books.find(book => book.id === id);
+            },
+            
+            add: (book) => {
+                const books = getFromStorage(STORAGE_KEYS.BOOKS, []);
+                const newBook = {
+                    ...book,
+                    id: generateUUID(),
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
+                };
+                
+                books.push(newBook);
+                saveToStorage(STORAGE_KEYS.BOOKS, books);
+                return newBook;
+            },
+            
+            update: (id, updates) => {
+                const books = getFromStorage(STORAGE_KEYS.BOOKS, []);
+                const index = books.findIndex(book => book.id === id);
+                
+                if (index !== -1) {
+                    books[index] = {
+                        ...books[index],
+                        ...updates,
+                        updatedAt: new Date().toISOString(),
+                    };
+                    saveToStorage(STORAGE_KEYS.BOOKS, books);
+                    return books[index];
+                }
+                
+                return undefined;
+            },
+            
+            delete: (id) => {
+                const books = getFromStorage(STORAGE_KEYS.BOOKS, []);
+                const filteredBooks = books.filter(book => book.id !== id);
+                
+                if (filteredBooks.length !== books.length) {
+                    saveToStorage(STORAGE_KEYS.BOOKS, filteredBooks);
+                    return true;
+                }
+                
+                return false;
+            },
+        };
+
+        // User service
+        const userService = {
+            getAll: () => {
+                return getFromStorage(STORAGE_KEYS.USERS, []);
+            },
+            
+            getById: (id) => {
+                const users = getFromStorage(STORAGE_KEYS.USERS, []);
+                return users.find(user => user.id === id);
+            },
+            
+            getByUsername: (username) => {
+                const users = getFromStorage(STORAGE_KEYS.USERS, []);
+                return users.find(user => user.username === username);
+            },
+            
+            register: (userData) => {
+                const users = getFromStorage(STORAGE_KEYS.USERS, []);
+                
+                // Check if username already exists
+                if (users.some(user => user.username === userData.username)) {
+                    throw new Error('Username already exists');
+                }
+                
+                const newUser = {
+                    ...userData,
+                    id: generateUUID(),
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
+                };
+                
+                users.push(newUser);
+                saveToStorage(STORAGE_KEYS.USERS, users);
+                return newUser;
+            },
+            
+            update: (id, updates) => {
+                const users = getFromStorage(STORAGE_KEYS.USERS, []);
+                const index = users.findIndex(user => user.id === id);
+                
+                if (index !== -1) {
+                    users[index] = {
+                        ...users[index],
+                        ...updates,
+                        updatedAt: new Date().toISOString(),
+                    };
+                    saveToStorage(STORAGE_KEYS.USERS, users);
+                    return users[index];
+                }
+                
+                return undefined;
+            },
+        };
+
+        // Authentication service
+        const authService = {
+            getAuthState: () => {
+                return getFromStorage(STORAGE_KEYS.AUTH, { isAuthenticated: false, user: null });
+            },
+            
+            login: (username, password) => {
+                const users = getFromStorage(STORAGE_KEYS.USERS, []);
+                const user = users.find(u => u.username === username && u.password === password);
+                
+                if (!user) {
+                    throw new Error('Invalid username or password');
+                }
+                
+                const authState = {
+                    isAuthenticated: true,
+                    user,
+                };
+                
+                saveToStorage(STORAGE_KEYS.AUTH, authState);
+                return authState;
+            },
+            
+            logout: () => {
+                saveToStorage(STORAGE_KEYS.AUTH, { isAuthenticated: false, user: null });
+            },
+        };
+
+        // Reading progress service
+        const progressService = {
+            getAll: () => {
+                return getFromStorage(STORAGE_KEYS.READING_PROGRESS, []);
+            },
+            
+            getByBookId: (bookId) => {
+                const progress = getFromStorage(STORAGE_KEYS.READING_PROGRESS, []);
+                return progress.filter(p => p.bookId === bookId);
+            },
+            
+            add: (progressData) => {
+                const progress = getFromStorage(STORAGE_KEYS.READING_PROGRESS, []);
+                
+                const newProgress = {
+                    ...progressData,
+                    id: generateUUID(),
+                };
+                
+                progress.push(newProgress);
+                saveToStorage(STORAGE_KEYS.READING_PROGRESS, progress);
+                
+                // Update the book's pages read
+                const books = getFromStorage(STORAGE_KEYS.BOOKS, []);
+                const bookIndex = books.findIndex(book => book.id === progressData.bookId);
+                
+                if (bookIndex !== -1) {
+                    books[bookIndex].pagesRead = progressData.pagesRead;
+                    books[bookIndex].updatedAt = new Date().toISOString();
+                    saveToStorage(STORAGE_KEYS.BOOKS, books);
+                }
+                
+                return newProgress;
+            },
+        };
+
+        // Data import/export service
+        const dataService = {
+            exportData: () => {
+                const data = {
+                    books: getFromStorage(STORAGE_KEYS.BOOKS, []),
+                    readingProgress: getFromStorage(STORAGE_KEYS.READING_PROGRESS, []),
+                    users: getFromStorage(STORAGE_KEYS.USERS, []),
+                };
+                
+                return JSON.stringify(data, null, 2);
+            },
+            
+            importData: (jsonData) => {
+                try {
+                    const data = JSON.parse(jsonData);
+                    
+                    if (data.books) {
+                        saveToStorage(STORAGE_KEYS.BOOKS, data.books);
+                    }
+                    
+                    if (data.readingProgress) {
+                        saveToStorage(STORAGE_KEYS.READING_PROGRESS, data.readingProgress);
+                    }
+                    
+                    if (data.users) {
+                        saveToStorage(STORAGE_KEYS.USERS, data.users);
+                    }
+                } catch (error) {
+                    console.error('Error importing data:', error);
+                    throw new Error('Invalid JSON data format');
+                }
+            },
+        };
+
+        // App state
+        let currentUser = null;
+        let currentBook = null;
+        let selectedRating = null;
+        let currentCoverImage = null;
+
+        // DOM Elements
+        const authView = document.getElementById('auth-view');
+        const appView = document.getElementById('app-view');
+        const authTitle = document.getElementById('auth-title');
+        const authForm = document.getElementById('auth-form');
+        const authSubmit = document.getElementById('auth-submit');
+        const authToggle = document.getElementById('auth-toggle');
+        const authError = document.getElementById('auth-error');
+        const nameField = document.getElementById('name-field');
+        const emailField = document.getElementById('email-field');
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const nameInput = document.getElementById('name');
+        const emailInput = document.getElementById('email');
+        
+        const userInitials = document.getElementById('user-initials');
+        const profileButton = document.getElementById('profile-button');
+        const navBookshelf = document.getElementById('nav-bookshelf');
+        const navProfile = document.getElementById('nav-profile');
+        const desktopNavBookshelf = document.getElementById('desktop-nav-bookshelf');
+        const desktopNavProfile = document.getElementById('desktop-nav-profile');
+        const appTitleButton = document.getElementById('app-title-button');
+        const bookshelfTab = document.getElementById('bookshelf-tab');
+        const bookDetailTab = document.getElementById('book-detail-tab');
+        const profileTab = document.getElementById('profile-tab');
+        
+        const booksContainer = document.getElementById('books-container');
+        const emptyBookshelf = document.getElementById('empty-bookshelf');
+        const addFirstBook = document.getElementById('add-first-book');
+        const addBookButton = document.getElementById('add-book-button');
+        const searchInput = document.getElementById('search-input');
+        
+        const backToBookshelf = document.getElementById('back-to-bookshelf');
+        const bookCover = document.getElementById('book-cover');
+        const bookTitle = document.getElementById('book-title');
+        const bookAuthor = document.getElementById('book-author');
+        const progressPercentage = document.getElementById('progress-percentage');
+        const progressValue = document.getElementById('progress-value');
+        const pagesInfo = document.getElementById('pages-info');
+        const startDate = document.getElementById('start-date');
+        const endDate = document.getElementById('end-date');
+        const updateProgressButton = document.getElementById('update-progress-button');
+        const bookRatingButton = document.getElementById('book-rating-button');
+        const ratingText = document.getElementById('rating-text');
+        const readingHistoryContainer = document.getElementById('reading-history-container');
+        const emptyHistory = document.getElementById('empty-history');
+        const quotesContainer = document.getElementById('quotes-container');
+        const emptyQuotes = document.getElementById('empty-quotes');
+        const addQuoteButton = document.getElementById('add-quote-button');
+        const deleteBookButton = document.getElementById('delete-book-button');
+        
+        const profileUsername = document.getElementById('profile-username');
+        const profileName = document.getElementById('profile-name');
+        const profileEmail = document.getElementById('profile-email');
+        const profileForm = document.getElementById('profile-form');
+        const profileSuccess = document.getElementById('profile-success');
+        const profileError = document.getElementById('profile-error');
+        const memberSince = document.getElementById('member-since');
+        const logoutButton = document.getElementById('logout-button');
+        const exportButton = document.getElementById('export-button');
+        const importFile = document.getElementById('import-file');
+        
+        // Modals
+        const addBookModal = document.getElementById('add-book-modal');
+        const addBookForm = document.getElementById('add-book-form');
+        const bookTitleInput = document.getElementById('book-title-input');
+        const bookAuthorInput = document.getElementById('book-author-input');
+        const bookPagesInput = document.getElementById('book-pages-input');
+        const bookCoverInput = document.getElementById('book-cover-input');
+        const bookCoverCamera = document.getElementById('book-cover-camera');
+        const bookCoverData = document.getElementById('book-cover-data');
+        const bookCoverPreview = document.getElementById('book-cover-preview');
+        const galleryUploadButton = document.getElementById('gallery-upload-button');
+        const cameraUploadButton = document.getElementById('camera-upload-button');
+        const bookStartDateInput = document.getElementById('book-start-date-input');
+        
+        const updateProgressModal = document.getElementById('update-progress-modal');
+        const updateProgressForm = document.getElementById('update-progress-form');
+        const pagesReadInput = document.getElementById('pages-read-input');
+        const pagesInfoModal = document.getElementById('pages-info-modal');
+        const finishedCheckbox = document.getElementById('finished-checkbox');
+        const readingNotesInput = document.getElementById('reading-notes-input');
+        
+        const addQuoteModal = document.getElementById('add-quote-modal');
+        const addQuoteForm = document.getElementById('add-quote-form');
+        const quoteContentInput = document.getElementById('quote-content-input');
+        const quotePageInput = document.getElementById('quote-page-input');
+        
+        const ratingModal = document.getElementById('rating-modal');
+        const ratingStars = document.getElementById('rating-stars');
+        const saveRatingButton = document.getElementById('save-rating-button');
+        
+        const deleteModal = document.getElementById('delete-modal');
+        const deleteBookTitle = document.getElementById('delete-book-title');
+        const confirmDeleteButton = document.getElementById('confirm-delete-button');
+        
+        const importModal = document.getElementById('import-modal');
+        const importFilename = document.getElementById('import-filename');
+        const importFilesize = document.getElementById('import-filesize');
+        const importError = document.getElementById('import-error');
+        const confirmImportButton = document.getElementById('confirm-import-button');
+        
+        const modalCloseButtons = document.querySelectorAll('.modal-close');
+        
+        // Initialize app
+        function initApp() {
+            const authState = authService.getAuthState();
+            
+            if (authState.isAuthenticated && authState.user) {
+                currentUser = authState.user;
+                showApp();
+                renderBookshelf();
+                updateProfileInfo();
+            } else {
+                showAuth();
+            }
+            
+            // Set up event listeners
+            setupEventListeners();
+        }
+        
+        // Show auth view
+        function showAuth() {
+            authView.classList.remove('hidden');
+            appView.classList.add('hidden');
+        }
+        
+        // Show app view
+        function showApp() {
+            authView.classList.add('hidden');
+            appView.classList.remove('hidden');
+            
+            // Update user initials
+            if (currentUser) {
+                userInitials.textContent = getInitials(currentUser.name);
+            }
+        }
+        
+        // Toggle auth mode (login/register)
+        function toggleAuthMode() {
+            const isRegistering = authTitle.textContent === 'Login';
+            
+            if (isRegistering) {
+                authTitle.textContent = 'Create an account';
+                authSubmit.textContent = 'Register';
+                authToggle.textContent = 'Already have an account? Login';
+                nameField.classList.remove('hidden');
+                emailField.classList.remove('hidden');
+            } else {
+                authTitle.textContent = 'Login';
+                authSubmit.textContent = 'Login';
+                authToggle.textContent = 'Don\'t have an account? Register';
+                nameField.classList.add('hidden');
+                emailField.classList.add('hidden');
+            }
+            
+            // Clear form
+            authForm.reset();
+            authError.classList.add('hidden');
+        }
+        
+        // Handle auth form submission
+        function handleAuthSubmit(e) {
+            e.preventDefault();
+            
+            const isRegistering = authTitle.textContent === 'Create an account';
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value.trim();
+            
+            if (!username || !password) {
+                showAuthError('All fields are required');
+                return;
+            }
+            
+            try {
+                if (isRegistering) {
+                    const name = nameInput.value.trim();
+                    const email = emailInput.value.trim();
+                    
+                    if (!name || !email) {
+                        showAuthError('All fields are required');
+                        return;
+                    }
+                    
+                    if (password.length < 6) {
+                        showAuthError('Password must be at least 6 characters');
+                        return;
+                    }
+                    
+                    // Register user
+                    userService.register({
+                        username,
+                        password,
+                        name,
+                        email
+                    });
+                }
+                
+                // Login
+                const authState = authService.login(username, password);
+                currentUser = authState.user;
+                
+                // Show app
+                showApp();
+                renderBookshelf();
+                updateProfileInfo();
+                
+            } catch (error) {
+                showAuthError(error.message);
+            }
+        }
+        
+        // Show auth error
+        function showAuthError(message) {
+            authError.textContent = message;
+            authError.classList.remove('hidden');
+        }
+        
+        // Render bookshelf
+        function renderBookshelf() {
+            const books = bookService.getAll();
+            const searchTerm = searchInput.value.trim().toLowerCase();
+            
+            // Filter books by search term
+            const filteredBooks = searchTerm ? 
+                books.filter(book => 
+                    book.title.toLowerCase().includes(searchTerm) || 
+                    book.author.toLowerCase().includes(searchTerm)
+                ) : 
+                books;
+            
+            // Clear container
+            booksContainer.innerHTML = '';
+            
+            if (filteredBooks.length === 0) {
+                if (searchTerm) {
+                    emptyBookshelf.querySelector('p').textContent = 'No books match your search.';
+                    emptyBookshelf.querySelector('button').classList.add('hidden');
+                } else {
+                    emptyBookshelf.querySelector('p').textContent = 'Your bookshelf is empty.';
+                    emptyBookshelf.querySelector('button').classList.remove('hidden');
+                }
+                
+                emptyBookshelf.classList.remove('hidden');
+            } else {
+                emptyBookshelf.classList.add('hidden');
+                
+                // Render books
+                filteredBooks.forEach(book => {
+                    const progressPercentage = book.totalPages > 0 
+                        ? Math.round((book.pagesRead / book.totalPages) * 100) 
+                        : 0;
+                    
+                    const bookCard = document.createElement('div');
+                    bookCard.className = 'book-card fade-in';
+                    
+                    // Determine cover style
+                    let coverStyle = '';
+                    let coverContent = '<div class="h-full flex items-center justify-center"><span class="text-gray-400">No cover</span></div>';
+                    
+                    if (book.coverImage) {
+                        // Use base64 image data
+                        coverStyle = `background-image: url('${book.coverImage}')`;
+                        coverContent = '';
+                    } else if (book.coverUrl) {
+                        // Use URL (for backward compatibility)
+                        coverStyle = `background-image: url('${book.coverUrl}')`;
+                        coverContent = '';
+                    }
+                    
+                    bookCard.innerHTML = `
+                        <div class="book-cover" style="${coverStyle}">
+                            ${coverContent}
+                            ${book.rating !== null ? `<div class="absolute top-2 right-2 bg-yellow-400 text-yellow-900 px-2 py-1 rounded-full text-xs font-bold">★ ${book.rating}</div>` : ''}
+                        </div>
+                        <div class="p-4">
+                            <h3 class="font-bold text-sm mb-1 line-clamp-2">${book.title}</h3>
+                            <p class="text-xs text-gray-500 mb-3">${book.author}</p>
+                            
+                            <div class="space-y-1 mt-2">
+                                <div class="flex justify-between text-xs">
+                                    <span>Progress</span>
+                                    <span>${progressPercentage}%</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-value" style="width: ${progressPercentage}%"></div>
+                                </div>
+                                <div class="flex justify-between text-xs text-gray-500">
+                                    <span>${book.pagesRead} of ${book.totalPages} pages</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Add click event
+                    bookCard.addEventListener('click', () => {
+                        showBookDetail(book.id);
+                    });
+                    
+                    booksContainer.appendChild(bookCard);
+                });
+            }
+        }
+        
+        // Show book detail
+        function showBookDetail(bookId) {
+            currentBook = bookService.getById(bookId);
+            
+            if (!currentBook) {
+                showToast('Book not found');
+                return;
+            }
+            
+            // Update UI
+            if (currentBook.coverImage) {
+                // Use base64 image data
+                bookCover.style.backgroundImage = `url('${currentBook.coverImage}')`;
+                bookCover.innerHTML = '';
+            } else if (currentBook.coverUrl) {
+                // Use URL (for backward compatibility)
+                bookCover.style.backgroundImage = `url('${currentBook.coverUrl}')`;
+                bookCover.innerHTML = '';
+            } else {
+                bookCover.style.backgroundImage = '';
+                bookCover.innerHTML = '<span class="text-gray-400">No cover</span>';
+            }
+            
+            bookTitle.textContent = currentBook.title;
+            bookAuthor.textContent = `by ${currentBook.author}`;
+            
+            const progressPercentageValue = currentBook.totalPages > 0 
+                ? Math.round((currentBook.pagesRead / currentBook.totalPages) * 100) 
+                : 0;
+            
+            progressPercentage.textContent = `${progressPercentageValue}%`;
+            progressValue.style.width = `${progressPercentageValue}%`;
+            pagesInfo.textContent = `${currentBook.pagesRead} of ${currentBook.totalPages} pages`;
+            
+            startDate.textContent = formatDate(currentBook.startDate);
+            endDate.textContent = formatDate(currentBook.endDate);
+            
+            if (currentBook.rating !== null) {
+                ratingText.textContent = `${currentBook.rating}/5`;
+                bookRatingButton.innerHTML = `<i class="fas fa-star text-yellow-500 mr-2"></i>${currentBook.rating}/5`;
+            } else {
+                ratingText.textContent = 'Rate';
+                bookRatingButton.innerHTML = `<i class="fas fa-star text-yellow-500 mr-2"></i>Rate`;
+            }
+            
+            // Render reading history
+            const readingHistory = progressService.getByBookId(currentBook.id);
+            readingHistoryContainer.innerHTML = '';
+            
+            if (readingHistory.length === 0) {
+                emptyHistory.classList.remove('hidden');
+                readingHistoryContainer.classList.add('hidden');
+            } else {
+                emptyHistory.classList.add('hidden');
+                readingHistoryContainer.classList.remove('hidden');
+                
+                readingHistory.forEach(progress => {
+                    const historyCard = document.createElement('div');
+                    historyCard.className = 'history-item fade-in';
+                    historyCard.innerHTML = `
+                        <div class="history-item-header">
+                            <span class="history-item-date">${formatDate(progress.date)}</span>
+                            <span class="history-item-pages">${progress.pagesRead} pages</span>
+                        </div>
+                        ${progress.notes ? `<p class="text-sm mt-2">${progress.notes}</p>` : ''}
+                    `;
+                    
+                    readingHistoryContainer.appendChild(historyCard);
+                });
+            }
+            
+            // Render quotes
+            quotesContainer.innerHTML = '';
+            
+            if (!currentBook.quotes || currentBook.quotes.length === 0) {
+                emptyQuotes.classList.remove('hidden');
+                quotesContainer.classList.add('hidden');
+            } else {
+                emptyQuotes.classList.add('hidden');
+                quotesContainer.classList.remove('hidden');
+                
+                currentBook.quotes.forEach(quote => {
+                    const quoteCard = document.createElement('div');
+                    quoteCard.className = 'quote-card bg-white rounded-lg shadow-sm p-4 mb-4 fade-in';
+                    quoteCard.innerHTML = `
+                        <p class="italic text-sm mb-2">${quote.content}</p>
+                        <div class="flex justify-between text-xs text-gray-500">
+                            <span>Page ${quote.page}</span>
+                            <span>${formatDate(quote.createdAt)}</span>
+                        </div>
+                    `;
+                    
+                    quotesContainer.appendChild(quoteCard);
+                });
+            }
+            
+            // Show book detail tab
+            showTab('book-detail');
+        }
+        
+        // Update profile info
+        function updateProfileInfo() {
+            if (currentUser) {
+                profileUsername.value = currentUser.username;
+                profileName.value = currentUser.name;
+                profileEmail.value = currentUser.email;
+                memberSince.textContent = `Member since: ${formatDate(currentUser.createdAt)}`;
+            }
+        }
+        
+        // Show tab
+        function showTab(tabName) {
+            // Hide all tabs
+            bookshelfTab.classList.remove('active');
+            bookDetailTab.classList.remove('active');
+            profileTab.classList.remove('active');
+            
+            // Remove active class from nav items
+            navBookshelf.classList.remove('active');
+            navProfile.classList.remove('active');
+            desktopNavBookshelf.classList.remove('active');
+            desktopNavProfile.classList.remove('active');
+            
+            // Show selected tab
+            if (tabName === 'bookshelf') {
+                bookshelfTab.classList.add('active');
+                navBookshelf.classList.add('active');
+                desktopNavBookshelf.classList.add('active');
+                addBookButton.classList.remove('hidden');
+            } else if (tabName === 'book-detail') {
+                bookDetailTab.classList.add('active');
+                addBookButton.classList.add('hidden');
+            } else if (tabName === 'profile') {
+                profileTab.classList.add('active');
+                navProfile.classList.add('active');
+                desktopNavProfile.classList.add('active');
+                addBookButton.classList.add('hidden');
+            }
+        }
+        
+        // Show modal
+        function showModal(modal) {
+            modal.classList.add('active');
+        }
+        
+        // Hide modal
+        function hideModal(modal) {
+            modal.classList.remove('active');
+        }
+        
+        // Handle image selection
+        async function handleImageSelection(file) {
+            if (!file) return;
+            
+            try {
+                // Read file as data URL
+                const reader = new FileReader();
+                
+                reader.onload = async (e) => {
+                    try {
+                        // Resize image to save storage space
+                        const resizedImage = await resizeImage(e.target.result);
+                        
+                        // Update preview
+                        bookCoverPreview.innerHTML = '';
+                        bookCoverPreview.style.backgroundImage = `url('${resizedImage}')`;
+                        
+                        // Store image data
+                        currentCoverImage = resizedImage;
+                        bookCoverData.value = resizedImage;
+                    } catch (error) {
+                        console.error('Error processing image:', error);
+                        showToast('Error processing image');
+                    }
+                };
+                
+                reader.onerror = () => {
+                    showToast('Error reading image file');
+                };
+                
+                reader.readAsDataURL(file);
+            } catch (error) {
+                console.error('Error handling image selection:', error);
+                showToast('Error handling image selection');
+            }
+        }
+        
+        // Handle add book
+        function handleAddBook(e) {
+            e.preventDefault();
+            
+            const title = bookTitleInput.value.trim();
+            const author = bookAuthorInput.value.trim();
+            const totalPages = parseInt(bookPagesInput.value);
+            const startDate = bookStartDateInput.value ? new Date(bookStartDateInput.value).toISOString() : null;
+            
+            if (!title || !author || isNaN(totalPages) || totalPages <= 0) {
+                showToast('Please fill in all required fields');
+                return;
+            }
+            
+            const newBook = bookService.add({
+                title,
+                author,
+                totalPages,
+                pagesRead: 0,
+                startDate,
+                endDate: null,
+                rating: null,
+                coverImage: currentCoverImage || null,
+                coverUrl: '', // Keep for backward compatibility
+                quotes: [],
+            });
+            
+            hideModal(addBookModal);
+            addBookForm.reset();
+            currentCoverImage = null;
+            bookCoverPreview.style.backgroundImage = '';
+            bookCoverPreview.innerHTML = '<span>No image selected</span>';
+            renderBookshelf();
+            showToast('Book added successfully');
+        }
+        
+        // Handle update progress
+        function handleUpdateProgress(e) {
+            e.preventDefault();
+            
+            if (!currentBook) return;
+            
+            const pagesRead = parseInt(pagesReadInput.value);
+            const notes = readingNotesInput.value.trim();
+            const isFinished = finishedCheckbox.checked;
+            
+            if (isNaN(pagesRead) || pagesRead < 0 || pagesRead > currentBook.totalPages) {
+                showToast('Please enter a valid number of pages');
+                return;
+            }
+            
+            // Add reading progress
+            progressService.add({
+                bookId: currentBook.id,
+                pagesRead: isFinished ? currentBook.totalPages : pagesRead,
+                date: new Date().toISOString(),
+                notes,
+            });
+            
+            // Update book if finished
+            if (isFinished) {
+                bookService.update(currentBook.id, {
+                    pagesRead: currentBook.totalPages,
+                    endDate: new Date().toISOString(),
+                });
+            }
+            
+            hideModal(updateProgressModal);
+            updateProgressForm.reset();
+            showBookDetail(currentBook.id);
+            showToast('Progress updated successfully');
+        }
+        
+        // Handle add quote
+        function handleAddQuote(e) {
+            e.preventDefault();
+            
+            if (!currentBook) return;
+            
+            const content = quoteContentInput.value.trim();
+            const page = parseInt(quotePageInput.value);
+            
+            if (!content || isNaN(page) || page <= 0 || page > currentBook.totalPages) {
+                showToast('Please fill in all fields correctly');
+                return;
+            }
+            
+            // Add quote
+            const quotes = currentBook.quotes || [];
+            const newQuote = {
+                id: generateUUID(),
+                content,
+                page,
+                bookId: currentBook.id,
+                createdAt: new Date().toISOString(),
+            };
+            
+            quotes.push(newQuote);
+            
+            bookService.update(currentBook.id, { quotes });
+            
+            hideModal(addQuoteModal);
+            addQuoteForm.reset();
+            showBookDetail(currentBook.id);
+            showToast('Quote added successfully');
+        }
+        
+        // Handle save rating
+        function handleSaveRating() {
+            if (!currentBook || selectedRating === null) return;
+            
+            bookService.update(currentBook.id, { rating: selectedRating });
+            
+            hideModal(ratingModal);
+            showBookDetail(currentBook.id);
+            showToast('Rating saved successfully');
+        }
+        
+        // Handle delete book
+        function handleDeleteBook() {
+            if (!currentBook) return;
+            
+            bookService.delete(currentBook.id);
+            
+            hideModal(deleteModal);
+            showTab('bookshelf');
+            renderBookshelf();
+            showToast('Book deleted successfully');
+        }
+        
+        // Handle update profile
+        function handleUpdateProfile(e) {
+            e.preventDefault();
+            
+            if (!currentUser) return;
+            
+            const name = profileName.value.trim();
+            const email = profileEmail.value.trim();
+            
+            if (!name || !email) {
+                profileError.textContent = 'All fields are required';
+                profileError.classList.remove('hidden');
+                profileSuccess.classList.add('hidden');
+                return;
+            }
+            
+            try {
+                userService.update(currentUser.id, { name, email });
+                currentUser = userService.getById(currentUser.id);
+                
+                // Update auth state
+                const authState = authService.getAuthState();
+                authState.user = currentUser;
+                saveToStorage(STORAGE_KEYS.AUTH, authState);
+                
+                // Update UI
+                userInitials.textContent = getInitials(currentUser.name);
+                
+                profileSuccess.textContent = 'Profile updated successfully';
+                profileSuccess.classList.remove('hidden');
+                profileError.classList.add('hidden');
+            } catch (error) {
+                profileError.textContent = error.message;
+                profileError.classList.remove('hidden');
+                profileSuccess.classList.add('hidden');
+            }
+        }
+        
+        // Handle logout
+        function handleLogout() {
+            authService.logout();
+            currentUser = null;
+            currentBook = null;
+            showAuth();
+        }
+        
+        // Handle export
+        function handleExport() {
+            try {
+                const jsonData = dataService.exportData();
+                
+                // Create a blob and download link
+                const blob = new Blob([jsonData], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                
+                // Create a temporary link and trigger download
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `bookshelf-export-${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                
+                // Clean up
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                showToast('Data exported successfully');
+            } catch (error) {
+                showToast('Failed to export data');
+                console.error(error);
+            }
+        }
+        
+        // Handle import file selection
+        function handleImportFileSelect() {
+            const file = importFile.files[0];
+            
+            if (file) {
+                importFilename.textContent = file.name;
+                importFilesize.textContent = `${(file.size / 1024).toFixed(2)} KB`;
+                confirmImportButton.disabled = false;
+                
+                showModal(importModal);
+            }
+        }
+        
+        // Handle import
+        function handleImport() {
+            const file = importFile.files[0];
+            
+            if (!file) {
+                importError.textContent = 'Please select a file to import';
+                importError.classList.remove('hidden');
+                return;
+            }
+            
+            const reader = new FileReader();
+            
+            reader.onload = (e) => {
+                try {
+                    const jsonData = e.target.result;
+                    
+                    // Validate JSON format
+                    JSON.parse(jsonData);
+                    
+                    // Import data
+                    dataService.importData(jsonData);
+                    
+                    hideModal(importModal);
+                    renderBookshelf();
+                    showToast('Data imported successfully');
+                    
+                    // Reset file input
+                    importFile.value = '';
+                } catch (error) {
+                    importError.textContent = 'Invalid JSON file format';
+                    importError.classList.remove('hidden');
+                }
+            };
+            
+            reader.onerror = () => {
+                importError.textContent = 'Failed to read file';
+                importError.classList.remove('hidden');
+            };
+            
+            reader.readAsText(file);
+        }
+        
+        // Setup event listeners
+        function setupEventListeners() {
+            // Auth
+            authToggle.addEventListener('click', toggleAuthMode);
+            authForm.addEventListener('submit', handleAuthSubmit);
+            
+            // Navigation
+            navBookshelf.addEventListener('click', (e) => {
+                e.preventDefault();
+                showTab('bookshelf');
+            });
+            
+            navProfile.addEventListener('click', (e) => {
+                e.preventDefault();
+                showTab('profile');
+            });
+            
+            desktopNavBookshelf.addEventListener('click', (e) => {
+                e.preventDefault();
+                showTab('bookshelf');
+            });
+            
+            desktopNavProfile.addEventListener('click', (e) => {
+                e.preventDefault();
+                showTab('profile');
+            });
+            
+            // App title button to go home
+            appTitleButton.addEventListener('click', () => {
+                showTab('bookshelf');
+            });
+            
+            profileButton.addEventListener('click', () => {
+                showTab('profile');
+            });
+            
+            backToBookshelf.addEventListener('click', () => {
+                showTab('bookshelf');
+            });
+            
+            // Search
+            searchInput.addEventListener('input', renderBookshelf);
+            
+            // Add book
+            addBookButton.addEventListener('click', () => {
+                addBookForm.reset();
+                currentCoverImage = null;
+                bookCoverPreview.style.backgroundImage = '';
+                bookCoverPreview.innerHTML = '<span>No image selected</span>';
+                showModal(addBookModal);
+            });
+            
+            addFirstBook.addEventListener('click', () => {
+                addBookForm.reset();
+                currentCoverImage = null;
+                bookCoverPreview.style.backgroundImage = '';
+                bookCoverPreview.innerHTML = '<span>No image selected</span>';
+                showModal(addBookModal);
+            });
+            
+            // Image upload
+            galleryUploadButton.addEventListener('click', () => {
+                bookCoverInput.click();
+            });
+            
+            cameraUploadButton.addEventListener('click', () => {
+                bookCoverCamera.click();
+            });
+            
+            bookCoverInput.addEventListener('change', (e) => {
+                if (e.target.files && e.target.files[0]) {
+                    handleImageSelection(e.target.files[0]);
+                }
+            });
+            
+            bookCoverCamera.addEventListener('change', (e) => {
+                if (e.target.files && e.target.files[0]) {
+                    handleImageSelection(e.target.files[0]);
+                }
+            });
+            
+            addBookForm.addEventListener('submit', handleAddBook);
+            
+            // Update progress
+            updateProgressButton.addEventListener('click', () => {
+                if (!currentBook) return;
+                
+                pagesReadInput.value = currentBook.pagesRead;
+                pagesReadInput.max = currentBook.totalPages;
+                finishedCheckbox.checked = false;
+                readingNotesInput.value = '';
+                
+                pagesInfoModal.textContent = `${currentBook.pagesRead} of ${currentBook.totalPages} pages read (${Math.round((currentBook.pagesRead / currentBook.totalPages) * 100)}%)`;
+                
+                showModal(updateProgressModal);
+            });
+            
+            updateProgressForm.addEventListener('submit', handleUpdateProgress);
+            
+            finishedCheckbox.addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    pagesReadInput.value = currentBook.totalPages;
+                    pagesReadInput.disabled = true;
+                } else {
+                    pagesReadInput.disabled = false;
+                }
+            });
+            
+            // Add quote
+            addQuoteButton.addEventListener('click', () => {
+                addQuoteForm.reset();
+                showModal(addQuoteModal);
+            });
+            
+            addQuoteForm.addEventListener('submit', handleAddQuote);
+            
+            // Rating
+            bookRatingButton.addEventListener('click', () => {
+                selectedRating = currentBook.rating;
+                
+                // Update stars
+                const stars = ratingStars.querySelectorAll('.star');
+                stars.forEach(star => {
+                    const rating = parseInt(star.dataset.rating);
+                    if (selectedRating !== null && rating <= selectedRating) {
+                        star.classList.remove('empty');
+                        star.classList.add('filled');
+                    } else {
+                        star.classList.remove('filled');
+                        star.classList.add('empty');
+                    }
+                });
+                
+                showModal(ratingModal);
+            });
+            
+            // Rating stars
+            const stars = ratingStars.querySelectorAll('.star');
+            stars.forEach(star => {
+                star.addEventListener('click', () => {
+                    const rating = parseInt(star.dataset.rating);
+                    selectedRating = rating;
+                    
+                    // Update stars
+                    stars.forEach(s => {
+                        const r = parseInt(s.dataset.rating);
+                        if (r <= rating) {
+                            s.classList.remove('empty');
+                            s.classList.add('filled');
+                        } else {
+                            s.classList.remove('filled');
+                            s.classList.add('empty');
+                        }
+                    });
+                });
+            });
+            
+            saveRatingButton.addEventListener('click', handleSaveRating);
+            
+            // Delete book
+            deleteBookButton.addEventListener('click', () => {
+                if (!currentBook) return;
+                
+                deleteBookTitle.textContent = currentBook.title;
+                showModal(deleteModal);
+            });
+            
+            confirmDeleteButton.addEventListener('click', handleDeleteBook);
+            
+            // Profile
+            profileForm.addEventListener('submit', handleUpdateProfile);
+            logoutButton.addEventListener('click', handleLogout);
+            
+            // Import/Export
+            exportButton.addEventListener('click', handleExport);
+            importFile.addEventListener('change', handleImportFileSelect);
+            confirmImportButton.addEventListener('click', handleImport);
+            
+            // Close modals
+            modalCloseButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const modal = button.closest('.modal');
+                    hideModal(modal);
+                });
+            });
+        }
+        
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
