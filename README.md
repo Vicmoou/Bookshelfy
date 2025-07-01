@@ -1,55 +1,57 @@
-# Bookshelfy - Personal Book Tracking App
+# NotePad - Simple Note Taking App
 
-A modern web application for tracking your reading progress, managing your book collection, and saving memorable quotes from your favorite books.
+A clean, modern web application for taking and managing notes with a beautiful, intuitive interface.
 
 ## Features
 
-- 📚 Track your reading progress
-- 📝 Save and manage book quotes
-- ⭐ Rate your books
-- 📱 Responsive design for mobile and desktop
-- 🔍 Search functionality
-- 📊 Reading statistics
-- 💾 Import/Export data
-- 🔐 User authentication
+- ✏️ Create and edit notes with rich text formatting
+- 🔍 Search through your notes instantly
+- �️ Organize notes with tags
+- 💾 Auto-save functionality
+- 📱 Responsive design for all devices
+- 🌙 Dark/Light theme toggle
+- 📊 Note statistics
+- 💾 Export notes as JSON
+- �️ Delete notes with confirmation
 
 ## Technologies Used
 
 - HTML5
-- CSS3 (with Tailwind CSS)
-- JavaScript (Vanilla)
-- Local Storage for data persistence
-- Font Awesome for icons
+- CSS3 (Modern CSS Grid & Flexbox)
+- Vanilla JavaScript
+- Local Storage for persistence
+- Font Awesome icons
 
 ## Setup
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/bookshelfy.git
+git clone https://github.com/yourusername/notepad.git
 ```
 
 2. Open `index.html` in your browser or use a local server.
 
 ## Usage
 
-1. Register a new account or login
-2. Add books to your bookshelf
-3. Track your reading progress
-4. Save quotes and rate books
-5. Export your data for backup
+1. Click "New Note" to create a note
+2. Type your content in the editor
+3. Add tags for organization
+4. Use the search bar to find specific notes
+5. Toggle between light and dark themes
+6. Export your notes for backup
 
 ## Deployment
 
-The app can be deployed on any static web hosting service like:
+This app works perfectly with:
 - GitHub Pages
 - Netlify
 - Vercel
-- Firebase Hosting
+- Any static hosting service
 
 ## License
 
-MIT License - feel free to use this project for your own purposes.
+MIT License - feel free to use and modify.
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request. 
+Pull requests welcome! Please feel free to contribute improvements. 
