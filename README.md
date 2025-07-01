@@ -4,14 +4,18 @@ A modern web application for tracking your reading progress, managing your book 
 
 ## Features
 
-- 📚 Track your reading progress
-- 📝 Save and manage book quotes
-- ⭐ Rate your books
+- 📚 Track your reading progress with detailed validation
+- 📝 Save and manage book quotes (with character limits)
+- ⭐ Rate your books (1-5 star rating system)
 - 📱 Responsive design for mobile and desktop
-- 🔍 Search functionality
-- 📊 Reading statistics
-- 💾 Import/Export data
-- 🔐 User authentication
+- 🔍 Enhanced search functionality with keyboard shortcuts
+- 📊 Reading statistics and progress tracking
+- 💾 Improved Import/Export data with validation
+- 🔐 Secure user authentication with password hashing
+- 🖼️ Optimized image handling with automatic resizing
+- ⌨️ Keyboard shortcuts (ESC, Ctrl+K, Ctrl+N)
+- 🔄 Loading states and better error handling
+- 📱 Accessibility improvements
 
 ## Technologies Used
 
